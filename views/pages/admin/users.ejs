@@ -1,0 +1,104 @@
+<%- include('../../layouts/base-top', { title: title }) %>
+<main class="container">
+  <h1>Admin — All Users</h1>
+
+  <section class="admin-create-form">
+    <h2>Create User</h2>
+    <form method="POST" action="/admin/users" class="form--inline">
+      <input type="text" name="first_name" placeholder="First name" required>
+      <input type="text" name="last_name" placeholder="Last name" required>
+      <input type="email" name="email" placeholder="Email" required>
+      <input type="password" name="password" placeholder="Password" required minlength="8">
+      <select name="role" required>
+        <option value="">Role…</option>
+        <option value="student">Student</option>
+        <option value="trainer">Trainer</option>
+        <option value="admin">Admin</option>
+      </select>
+      <button type="submit" class="btn btn--primary">Create</button>
+    </form>
+  </section>
+
+  <% if (users.length === 0 && page === 1) { %>
+    <p class="text--muted">No users yet.</p>
+  <% } else { %>
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th>Created</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% users.forEach(function(u) { %>
+          <tr class="<%= !u.is_active ? 'admin-table__row--inactive' : '' %>">
+            <td><%= u.id %></td>
+            <td><%= u.first_name %> <%= u.last_name %></td>
+            <td><%= u.email %></td>
+            <td><span class="badge badge--role"><%= u.role %></span></td>
+            <td>
+              <% if (u.is_active) { %>
+                <span class="badge badge--active">active</span>
+              <% } else { %>
+                <span class="badge badge--deleted">inactive</span>
+              <% } %>
+            </td>
+            <td><%= new Date(u.created_at).toLocaleDateString() %></td>
+            <td class="admin-actions">
+              <details class="admin-edit-details">
+                <summary class="btn btn--sm">Edit</summary>
+                <form method="POST" action="/admin/users/<%= u.id %>" class="form--compact">
+                  <input type="text" name="first_name" value="<%= u.first_name %>" required>
+                  <input type="text" name="last_name" value="<%= u.last_name %>" required>
+                  <input type="email" name="email" value="<%= u.email %>">
+                  <button type="submit" class="btn btn--sm btn--primary">Save</button>
+                </form>
+              </details>
+
+              <% if (u.is_active) { %>
+                <form method="POST" action="/admin/users/<%= u.id %>/deactivate"
+                      onsubmit="return confirm('Deactivate this user?');">
+                  <button type="submit" class="btn btn--sm btn--warning">Deactivate</button>
+                </form>
+              <% } else { %>
+                <form method="POST" action="/admin/users/<%= u.id %>/activate">
+                  <button type="submit" class="btn btn--sm">Activate</button>
+                </form>
+              <% } %>
+
+              <% if (u.role === 'trainer') { %>
+                <form method="POST" action="/admin/users/<%= u.id %>/delete-trainer-profile"
+                      onsubmit="return confirm('Delete trainer profile only? The user account and gym listing remain.');">
+                  <button type="submit" class="btn btn--sm btn--warning">Del Profile</button>
+                </form>
+              <% } %>
+
+              <form method="POST" action="/admin/users/<%= u.id %>/delete"
+                    onsubmit="return confirm('Permanently delete this user and ALL their data? This cannot be undone.');">
+                <button type="submit" class="btn btn--sm btn--danger">Delete</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+
+    <% if (totalPages > 1) { %>
+      <nav class="pagination">
+        <% if (page > 1) { %>
+          <a href="/admin/users?page=<%= page - 1 %>" class="btn btn--sm">← Prev</a>
+        <% } %>
+        <span class="pagination__info">Page <%= page %> of <%= totalPages %></span>
+        <% if (page < totalPages) { %>
+          <a href="/admin/users?page=<%= page + 1 %>" class="btn btn--sm">Next →</a>
+        <% } %>
+      </nav>
+    <% } %>
+  <% } %>
+</main>
+<%- include('../../layouts/base-bottom') %>

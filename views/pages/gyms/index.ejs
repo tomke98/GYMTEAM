@@ -1,0 +1,38 @@
+<%- include('../../layouts/base-top', { title: title }) %>
+<main class="container">
+  <h1>Browse Gyms</h1>
+
+  <% if (gyms.length === 0) { %>
+    <p class="text--muted">No active gym listings at this time.</p>
+  <% } else { %>
+    <div class="card-grid">
+      <% gyms.forEach(function(g) { %>
+        <a href="/gyms/<%= g.id %>" class="card gym-card">
+          <div class="card__photo">
+            <% if (g.photo_urls && g.photo_urls[0]) { %>
+              <img src="<%= g.photo_urls[0] %>" alt="<%= g.name %>">
+            <% } else { %>
+              <div class="card__no-photo"></div>
+            <% } %>
+          </div>
+          <div class="card__body">
+            <h3 class="card__name"><%= g.name %></h3>
+            <p class="card__address"><%= g.address %></p>
+            <% if (g.monthly_price) { %>
+              <p class="card__price">$<%= parseFloat(g.monthly_price).toFixed(2) %>/month</p>
+            <% } %>
+            <p class="card__rating">
+              <% if (g.average_rating) { %>
+                <%= parseFloat(g.average_rating).toFixed(1) %> ★
+                <span class="card__review-count">(<%= g.review_count %>)</span>
+              <% } else { %>
+                <span class="text--muted">No ratings yet</span>
+              <% } %>
+            </p>
+          </div>
+        </a>
+      <% }) %>
+    </div>
+  <% } %>
+</main>
+<%- include('../../layouts/base-bottom') %>

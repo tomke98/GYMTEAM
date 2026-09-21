@@ -1,0 +1,113 @@
+<%- include('../../layouts/base-top', { title: title }) %>
+<main class="container">
+  <h1>Edit Gym Listing</h1>
+
+  <p class="status-badge status-badge--<%= gym.status %>">
+    Status: <strong><%= gym.status %></strong>
+  </p>
+
+  <form method="POST" action="/gyms/<%= gym.id %>" enctype="multipart/form-data">
+    <fieldset>
+      <legend>Basic Info</legend>
+
+      <div class="form-group">
+        <label for="name">Gym Name <span class="required">*</span></label>
+        <input type="text" id="name" name="name" value="<%= gym.name || '' %>" required>
+      </div>
+
+      <div class="form-group">
+        <label for="address">Address <span class="required">*</span></label>
+        <textarea id="address" name="address" rows="2" required><%= gym.address || '' %></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description (optional)</label>
+        <textarea id="description" name="description" rows="4"><%= gym.description || '' %></textarea>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Hours &amp; Days</legend>
+
+      <div class="form-group">
+        <label for="opening_time">Opening Time</label>
+        <input type="time" id="opening_time" name="opening_time"
+               value="<%= gym.opening_time ? gym.opening_time.substring(0,5) : '' %>">
+      </div>
+
+      <div class="form-group">
+        <label for="closing_time">Closing Time</label>
+        <input type="time" id="closing_time" name="closing_time"
+               value="<%= gym.closing_time ? gym.closing_time.substring(0,5) : '' %>">
+      </div>
+
+      <div class="form-group">
+        <label>Working Days</label>
+        <% const selectedDays = gym.working_days || [] %>
+        <div class="checkbox-group">
+          <% ['mon','tue','wed','thu','fri','sat','sun'].forEach(function(d) { %>
+            <label class="checkbox-label">
+              <input type="checkbox" name="working_days" value="<%= d %>"
+                     <%= selectedDays.includes(d) ? 'checked' : '' %>>
+              <%= d.charAt(0).toUpperCase() + d.slice(1) %>
+            </label>
+          <% }) %>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Pricing</legend>
+
+      <div class="form-group">
+        <label for="monthly_price">Monthly Membership ($)</label>
+        <input type="number" id="monthly_price" name="monthly_price" min="0" step="0.01"
+               value="<%= gym.monthly_price || '' %>">
+      </div>
+
+      <div class="form-group">
+        <label for="yearly_price">Yearly Membership ($) (optional)</label>
+        <input type="number" id="yearly_price" name="yearly_price" min="0" step="0.01"
+               value="<%= gym.yearly_price || '' %>">
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Photos</legend>
+      <% if (gym.photo_urls && gym.photo_urls.length > 0) { %>
+        <div class="form-group">
+          <label>Current Photos</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+            <% gym.photo_urls.forEach(function(url) { %>
+              <img src="<%= url %>" alt="Gym photo" style="width:100px;height:100px;object-fit:cover;border-radius:4px;">
+            <% }) %>
+          </div>
+          <small>Uploading new photos below will replace all current photos.</small>
+        </div>
+      <% } %>
+      <input type="hidden" name="existing_photo_urls" value="<%= (gym.photo_urls || []).join(',') %>">
+      <div class="form-group">
+        <label for="photo_files">Upload New Photos (up to 5, max 5 MB each)</label>
+        <input type="file" id="photo_files" name="photo_files" accept="image/*" multiple>
+      </div>
+    </fieldset>
+
+    <button type="submit" class="btn btn--primary">Save Changes</button>
+    <a href="/gyms/<%= gym.id %>" class="btn btn--secondary">View Public Page</a>
+  </form>
+
+  <% if (gym.status !== 'inactive') { %>
+    <hr>
+    <section class="danger-zone">
+      <h2>Deactivate Listing</h2>
+      <p>Deactivating hides your gym from browse results. All data is retained and can be reactivated by saving the form.</p>
+      <form method="POST" action="/gyms/<%= gym.id %>/deactivate">
+        <button type="submit" class="btn btn--danger"
+                data-confirm="Deactivate this gym listing? It will be hidden from browse results.">
+          Deactivate Listing
+        </button>
+      </form>
+    </section>
+  <% } %>
+</main>
+<%- include('../../layouts/base-bottom') %>

@@ -1,0 +1,34 @@
+<%- include('../../layouts/base-top', { title: title }) %>
+<main class="container">
+  <h1>My Subscriptions</h1>
+
+  <% if (subscriptions.length === 0) { %>
+    <p class="text--muted">You have no subscriptions yet.</p>
+    <a href="/trainers" class="btn btn--primary">Browse Trainers</a>
+  <% } else { %>
+    <ul class="subscription-list">
+      <% subscriptions.forEach(function(s) { %>
+        <li class="subscription-item">
+          <div class="subscription-item__trainer">
+            <a href="/trainers/<%= s.trainer_id %>">
+              <%= s.trainer_first_name %> <%= s.trainer_last_name %>
+            </a>
+          </div>
+          <span class="status-badge status-badge--<%= s.status %>">
+            <%= s.status.charAt(0).toUpperCase() + s.status.slice(1) %>
+          </span>
+          <% if (s.status === 'pending') { %>
+            <div class="text--muted">Expires: <%= new Date(s.expires_at).toLocaleDateString() %></div>
+          <% } %>
+          <div class="text--muted">Requested: <%= new Date(s.requested_at).toLocaleDateString() %></div>
+          <% if (s.status === 'active') { %>
+            <form method="POST" action="/subscriptions/<%= s.id %>/cancel">
+              <button type="submit" class="btn btn--danger">Cancel Subscription</button>
+            </form>
+          <% } %>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+</main>
+<%- include('../../layouts/base-bottom') %>

@@ -1,0 +1,28 @@
+<%- include('../../layouts/base-top', { title: title }) %>
+<main class="container">
+  <h1>My Bookings</h1>
+  <a href="/auth/student-dashboard" class="btn btn--secondary">← Back to Dashboard</a>
+
+  <% if (bookings.length === 0) { %>
+    <p class="text--muted">No bookings yet. Browse trainers and book a session!</p>
+  <% } else { %>
+    <ul class="booking-list">
+      <% bookings.forEach(function(booking) { %>
+        <li class="booking-item booking-item--<%= booking.status %>">
+          <strong><%= new Date(booking.session_date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' }) %></strong>
+          — <%= booking.start_time.substring(0, 5) %> to <%= booking.end_time.substring(0, 5) %><br>
+          Trainer: <%= booking.trainer_first_name %> <%= booking.trainer_last_name %><br>
+          Type: <%= booking.slot_session_type %> |
+          Status: <span class="status-badge status-badge--<%= booking.status %>"><%= booking.status.replace(/_/g, ' ') %></span>
+          <% if (booking.status === 'confirmed') { %>
+            <form method="POST" action="/bookings/<%= booking.id %>/cancel" style="display:inline-block; margin-left: 1rem;"
+                  onsubmit="return confirm('Cancel this booking?')">
+              <button type="submit" class="btn btn--danger btn--sm">Cancel</button>
+            </form>
+          <% } %>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+</main>
+<%- include('../../layouts/base-bottom') %>

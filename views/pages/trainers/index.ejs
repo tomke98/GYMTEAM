@@ -1,0 +1,87 @@
+<%- include('../../layouts/base-top', { title: title }) %>
+<main class="container">
+  <h1>Browse Trainers</h1>
+
+  <form method="GET" action="/trainers" class="filter-form">
+    <div class="filter-form__controls">
+      <div class="form-group">
+        <label for="gym">Gym</label>
+        <select id="gym" name="gym">
+          <option value="">All Gyms</option>
+          <% gyms.forEach(function(g) { %>
+            <option value="<%= g.id %>" <%= filters.gym === String(g.id) ? 'selected' : '' %>><%= g.name %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="minRating">Min Rating</label>
+        <select id="minRating" name="minRating">
+          <option value="" <%= filters.minRating === '' ? 'selected' : '' %>>Any Rating</option>
+          <option value="3" <%= filters.minRating === '3' ? 'selected' : '' %>>3★+</option>
+          <option value="4" <%= filters.minRating === '4' ? 'selected' : '' %>>4★+</option>
+          <option value="5" <%= filters.minRating === '5' ? 'selected' : '' %>>5★ only</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="certification">Certification</label>
+        <select id="certification" name="certification">
+          <option value="" <%= filters.certification === '' ? 'selected' : '' %>>Any Certification</option>
+          <% ['NASM','ACE','ISSA','NSCA','NESTA','ACSM','Other'].forEach(function(c) { %>
+            <option value="<%= c %>" <%= filters.certification === c ? 'selected' : '' %>><%= c %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div class="filter-form__actions">
+        <button type="submit" class="btn btn--primary">Filter</button>
+        <a href="/trainers" class="btn btn--secondary">Clear</a>
+      </div>
+    </div>
+  </form>
+
+  <% if (trainers.length === 0) { %>
+    <p class="text--muted">No trainers found matching your criteria.</p>
+  <% } else { %>
+    <div class="card-grid">
+      <% trainers.forEach(function(t) { %>
+        <a href="/trainers/<%= t.id %>" class="card trainer-card">
+          <div class="card__photo">
+            <% if (t.photo_url) { %>
+              <img src="<%= t.photo_url %>" alt="<%= t.first_name %> <%= t.last_name %>">
+            <% } else { %>
+              <div class="card__no-photo"></div>
+            <% } %>
+          </div>
+          <div class="card__body">
+            <h3 class="card__name"><%= t.first_name %> <%= t.last_name %></h3>
+            <div class="card__badges">
+              <% if (t.certification) { %>
+                <span class="badge badge--cert"><%= t.certification %></span>
+              <% } %>
+              <% if (!t.is_profile_complete) { %>
+                <span class="badge badge--warning">Incomplete Profile</span>
+              <% } %>
+            </div>
+            <% if (t.per_session_rate) { %>
+              <p class="card__rate">$<%= parseFloat(t.per_session_rate).toFixed(2) %>/session</p>
+            <% } %>
+            <p class="card__rating">
+              <% if (t.average_rating) { %>
+                <%= parseFloat(t.average_rating).toFixed(1) %> ★
+                <span class="card__review-count">(<%= t.review_count %>)</span>
+              <% } else { %>
+                <span class="text--muted">No ratings yet</span>
+              <% } %>
+            </p>
+            <% if (t.gym_name) { %>
+              <p class="card__gym">Gym: <%= t.gym_name %></p>
+            <% } %>
+          </div>
+        </a>
+      <% }) %>
+    </div>
+  <% } %>
+</main>
+<%- include('../../layouts/base-bottom') %>

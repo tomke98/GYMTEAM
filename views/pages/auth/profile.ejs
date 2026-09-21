@@ -1,0 +1,29 @@
+<%- include('../../layouts/base-top', { title: 'My Profile' }) %>
+<main class="container">
+  <h1>My Profile</h1>
+  <form method="POST" action="/auth/profile">
+    <div class="form-group">
+      <label for="first_name">First Name</label>
+      <input type="text" id="first_name" name="first_name" value="<%= user.first_name %>" required>
+    </div>
+    <div class="form-group">
+      <label for="last_name">Last Name</label>
+      <input type="text" id="last_name" name="last_name" value="<%= user.last_name %>" required>
+    </div>
+    <div class="form-group">
+      <label for="new_password">New Password <small>(leave blank to keep current)</small></label>
+      <input type="password" id="new_password" name="new_password" minlength="8">
+    </div>
+    <button type="submit" class="btn btn--primary">Save Changes</button>
+  </form>
+  <hr>
+  <section class="danger-zone">
+    <h2>Danger Zone</h2>
+    <p>Deleting your account is permanent and cannot be undone. All your data will be removed.</p>
+    <form method="POST" action="/auth/delete-account">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <button type="submit" class="btn btn--danger" data-confirm="Are you sure? This action is permanent and cannot be undone.">Delete My Account</button>
+    </form>
+  </section>
+</main>
+<%- include('../../layouts/base-bottom') %>

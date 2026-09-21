@@ -1,0 +1,77 @@
+<%- include('../../layouts/base-top', { title: title }) %>
+<main class="container">
+  <%- include('../../partials/flash') %>
+  <h1>Admin — All Reviews</h1>
+  <% if (reviews.length === 0 && page === 1) { %>
+    <p class="text--muted">No reviews on the platform yet.</p>
+  <% } else { %>
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Type</th>
+          <th>Entity</th>
+          <th>Reviewer</th>
+          <th>Rating</th>
+          <th>Comment</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% reviews.forEach(function(review) { %>
+          <tr class="<%= review.is_deleted ? 'admin-table__row--deleted' : '' %>">
+            <td><%= review.id %></td>
+            <td><%= review.review_type %></td>
+            <td><%= review.entity_name %></td>
+            <td><%= review.reviewer_name %></td>
+            <td>
+              <% if (review.review_type === 'student') { %>
+                C:<%= review.rating_coachability %> / T:<%= review.rating_consistency %>
+              <% } else { %>
+                <%= review.rating %> ★
+              <% } %>
+            </td>
+            <td class="review__comment--truncate"><%= review.comment %></td>
+            <td><%= new Date(review.created_at).toLocaleDateString() %></td>
+            <td>
+              <% if (review.is_deleted) { %>
+                <span class="badge badge--deleted">deleted</span>
+              <% } else { %>
+                <span class="badge badge--active">active</span>
+              <% } %>
+            </td>
+            <td>
+              <% if (!review.is_deleted) { %>
+                <form method="POST"
+                      action="/admin/reviews/<%= review.review_type %>-reviews/<%= review.id %>/delete"
+                      onsubmit="return confirm('<%= review.review_type === `student` ? `Soft-delete this review?` : `Soft-delete this review? Ratings will recalculate immediately.` %>');">
+                  <button type="submit" class="btn btn--danger btn--sm">Delete</button>
+                </form>
+              <% } else { %>
+                <form method="POST"
+                      action="/admin/reviews/<%= review.review_type %>-reviews/<%= review.id %>/restore"
+                      onsubmit="return confirm('<%= review.review_type === `student` ? `Restore this review?` : `Restore this review? Ratings will recalculate immediately.` %>');">
+                  <button type="submit" class="btn btn--success btn--sm">Restore</button>
+                </form>
+              <% } %>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <% if (totalPages > 1) { %>
+      <nav class="pagination">
+        <% if (page > 1) { %>
+          <a href="/admin/reviews?page=<%= page - 1 %>" class="btn btn--sm">← Prev</a>
+        <% } %>
+        <span class="pagination__info">Page <%= page %> of <%= totalPages %></span>
+        <% if (page < totalPages) { %>
+          <a href="/admin/reviews?page=<%= page + 1 %>" class="btn btn--sm">Next →</a>
+        <% } %>
+      </nav>
+    <% } %>
+  <% } %>
+</main>
+<%- include('../../layouts/base-bottom') %>

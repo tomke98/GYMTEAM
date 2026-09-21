@@ -1,0 +1,76 @@
+<%- include('../../layouts/base-top', { title: title }) %>
+<main class="container">
+  <h1>Create Gym Listing</h1>
+
+  <form method="POST" action="/gyms" enctype="multipart/form-data">
+    <fieldset>
+      <legend>Basic Info</legend>
+
+      <div class="form-group">
+        <label for="name">Gym Name <span class="required">*</span></label>
+        <input type="text" id="name" name="name" required>
+      </div>
+
+      <div class="form-group">
+        <label for="address">Address <span class="required">*</span></label>
+        <textarea id="address" name="address" rows="2" required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description (optional)</label>
+        <textarea id="description" name="description" rows="4"></textarea>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Hours &amp; Days</legend>
+
+      <div class="form-group">
+        <label for="opening_time">Opening Time</label>
+        <input type="time" id="opening_time" name="opening_time">
+      </div>
+
+      <div class="form-group">
+        <label for="closing_time">Closing Time</label>
+        <input type="time" id="closing_time" name="closing_time">
+      </div>
+
+      <div class="form-group">
+        <label>Working Days</label>
+        <div class="checkbox-group">
+          <% ['mon','tue','wed','thu','fri','sat','sun'].forEach(function(d) { %>
+            <label class="checkbox-label">
+              <input type="checkbox" name="working_days" value="<%= d %>">
+              <%= d.charAt(0).toUpperCase() + d.slice(1) %>
+            </label>
+          <% }) %>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Pricing</legend>
+
+      <div class="form-group">
+        <label for="monthly_price">Monthly Membership ($)</label>
+        <input type="number" id="monthly_price" name="monthly_price" min="0" step="0.01">
+      </div>
+
+      <div class="form-group">
+        <label for="yearly_price">Yearly Membership ($) (optional)</label>
+        <input type="number" id="yearly_price" name="yearly_price" min="0" step="0.01">
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Photos</legend>
+      <div class="form-group">
+        <label for="photo_files">Upload Photos (up to 5, max 5 MB each)</label>
+        <input type="file" id="photo_files" name="photo_files" accept="image/*" multiple>
+      </div>
+    </fieldset>
+
+    <button type="submit" class="btn btn--primary">Create Gym Listing</button>
+  </form>
+</main>
+<%- include('../../layouts/base-bottom') %>

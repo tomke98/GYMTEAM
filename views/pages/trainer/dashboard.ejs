@@ -1,0 +1,66 @@
+<%- include('../../layouts/base-top', { title: title }) %>
+<main class="container">
+  <h1>Trainer Dashboard</h1>
+  <p>Welcome back!</p>
+  <ul>
+    <li><a href="/trainers/me/edit">Manage Trainer Profile</a></li>
+    <li><a href="/gyms/me">Manage Gym Listing</a></li>
+    <li><a href="/trainers/me/schedules">Manage Schedule</a></li>
+    <li><a href="/bookings/trainer">My Bookings</a></li>
+    <li><a href="/subscriptions/requests">Subscription Requests</a></li>
+    <li><a href="/auth/profile">Account Settings</a></li>
+  </ul>
+
+  <section class="trainer-section">
+    <h2>My Students</h2>
+    <% if (students.length === 0) { %>
+      <p class="text--muted">No active or past students yet.</p>
+    <% } else { %>
+      <ul class="student-list">
+        <% students.forEach(function(student) { %>
+          <li class="student-item">
+            <div class="student-item__info">
+              <strong><%= student.student_first_name %> <%= student.student_last_name %></strong>
+              <span class="text--muted">(<%= student.status %>)</span>
+            </div>
+            <% if (!student.existing_review_id) { %>
+              <form method="POST" action="/reviews/student-reviews" class="student-review-form">
+                <input type="hidden" name="subscription_id" value="<%= student.subscription_id %>">
+                <div class="form-group">
+                  <label for="coachability-<%= student.subscription_id %>">Coachability</label>
+                  <select id="coachability-<%= student.subscription_id %>" name="rating_coachability" required>
+                    <option value="">— select —</option>
+                    <option value="5">5 ★ Excellent</option>
+                    <option value="4">4 ★ Good</option>
+                    <option value="3">3 ★ Average</option>
+                    <option value="2">2 ★ Below Average</option>
+                    <option value="1">1 ★ Poor</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="consistency-<%= student.subscription_id %>">Consistency</label>
+                  <select id="consistency-<%= student.subscription_id %>" name="rating_consistency" required>
+                    <option value="">— select —</option>
+                    <option value="5">5 ★ Excellent</option>
+                    <option value="4">4 ★ Good</option>
+                    <option value="3">3 ★ Average</option>
+                    <option value="2">2 ★ Below Average</option>
+                    <option value="1">1 ★ Poor</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="comment-<%= student.subscription_id %>">Comment <small>(optional)</small></label>
+                  <textarea id="comment-<%= student.subscription_id %>" name="comment" rows="3" placeholder="Optional notes..."></textarea>
+                </div>
+                <button type="submit" class="btn btn--primary">Submit Review</button>
+              </form>
+            <% } else { %>
+              <p class="text--muted">Review already submitted.</p>
+            <% } %>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </section>
+</main>
+<%- include('../../layouts/base-bottom') %>

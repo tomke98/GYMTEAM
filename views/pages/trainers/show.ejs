@@ -1,0 +1,228 @@
+<%- include('../../layouts/base-top', { title: title }) %>
+<main class="container">
+
+  <% if (!trainer.is_profile_complete) { %>
+    <div class="alert alert--warning">⚠️ Incomplete Profile — this trainer hasn't filled all required fields.</div>
+  <% } %>
+
+  <div class="trainer-header">
+    <% if (trainer.photo_url) { %>
+      <img src="<%= trainer.photo_url %>" alt="<%= trainer.first_name %> <%= trainer.last_name %>" class="trainer-photo">
+    <% } %>
+    <div>
+      <h1><%= trainer.first_name %> <%= trainer.last_name %></h1>
+      <% if (trainer.certification) { %>
+        <span class="badge badge--cert"><%= trainer.certification %></span>
+      <% } %>
+      <% if (trainer.average_rating) { %>
+        <div class="rating-block">
+          <% if (trainer.recent_average_rating) { %>
+            <span class="rating rating--primary"><%= parseFloat(trainer.recent_average_rating).toFixed(1) %> ★ <small class="text--muted">6-month avg</small></span>
+          <% } else { %>
+            <span class="rating rating--muted">No recent reviews <small class="text--muted">(6-month)</small></span>
+          <% } %>
+          <span class="rating rating--secondary text--muted"><%= parseFloat(trainer.average_rating).toFixed(1) %> ★ all-time (<%= trainer.review_count %> review<%= trainer.review_count !== 1 ? 's' : '' %>)</span>
+        </div>
+      <% } else { %>
+        <span class="rating rating--empty">No ratings yet</span>
+      <% } %>
+    </div>
+  </div>
+
+  <% if (locals.user && String(locals.user.userId) === String(trainer.id)) { %>
+    <a href="/trainers/me/edit" class="btn btn--secondary">Edit Your Profile</a>
+  <% } %>
+
+  <% if (locals.user && locals.user.role === 'student') { %>
+    <section class="trainer-section">
+      <h2>Subscription</h2>
+      <% if (subscription && subscription.status === 'active') { %>
+        <p>You have an <strong>active</strong> subscription with this trainer.</p>
+        <a href="/subscriptions" class="btn btn--secondary">View My Subscriptions</a>
+      <% } else if (subscription && subscription.status === 'pending') { %>
+        <p>Your subscription request is <strong>pending</strong>.</p>
+        <p class="text--muted">Expires: <%= new Date(subscription.expires_at).toLocaleDateString() %></p>
+        <a href="/subscriptions" class="btn btn--secondary">View My Subscriptions</a>
+      <% } else if (isBlocked) { %>
+        <p class="text--muted">You cannot subscribe to this trainer. This restriction is permanent — you have been declined the maximum number of times.</p>
+        <button class="btn btn--primary" disabled>Subscribe</button>
+      <% } else { %>
+        <form method="POST" action="/subscriptions">
+          <input type="hidden" name="trainer_id" value="<%= trainer.id %>">
+          <button type="submit" class="btn btn--primary">Subscribe</button>
+        </form>
+      <% } %>
+    </section>
+  <% } %>
+
+  <section class="trainer-section">
+    <h2>About</h2>
+    <% if (trainer.bio) { %>
+      <p><%= trainer.bio %></p>
+    <% } else { %>
+      <p class="text--muted">No bio provided.</p>
+    <% } %>
+  </section>
+
+  <section class="trainer-section">
+    <h2>Trust Signals</h2>
+    <ul class="trust-list">
+      <li class="<%= trainer.cpr_certified ? 'trust-list__item--yes' : 'trust-list__item--no' %>">
+        CPR Certified: <%= trainer.cpr_certified ? '✓ Yes' : '✗ No' %>
+      </li>
+      <li class="<%= trainer.liability_insurance ? 'trust-list__item--yes' : 'trust-list__item--no' %>">
+        Liability Insurance: <%= trainer.liability_insurance ? '✓ Yes' : '✗ No' %>
+      </li>
+    </ul>
+  </section>
+
+  <section class="trainer-section">
+    <h2>Pricing</h2>
+    <% if (trainer.per_session_rate) { %>
+      <p>Per session: <strong>$<%= parseFloat(trainer.per_session_rate).toFixed(2) %></strong></p>
+    <% } %>
+    <% if (trainer.monthly_rate) { %>
+      <p>Monthly: <strong>$<%= parseFloat(trainer.monthly_rate).toFixed(2) %></strong></p>
+    <% } %>
+    <% if (!trainer.per_session_rate && !trainer.monthly_rate) { %>
+      <p class="text--muted">No pricing listed.</p>
+    <% } %>
+  </section>
+
+  <section class="trainer-section">
+    <h2>Contact</h2>
+    <ul class="contact-list">
+      <% if (trainer.whatsapp) { %><li>WhatsApp: <%= trainer.whatsapp %></li><% } %>
+      <% if (trainer.email_contact) { %><li>Email: <a href="mailto:<%= trainer.email_contact %>"><%= trainer.email_contact %></a></li><% } %>
+      <% if (trainer.instagram_url) { %><li>Instagram: <a href="<%= trainer.instagram_url %>" target="_blank" rel="noopener">Instagram</a></li><% } %>
+      <% if (trainer.website_url) { %><li>Website: <a href="<%= trainer.website_url %>" target="_blank" rel="noopener"><%= trainer.website_url %></a></li><% } %>
+    </ul>
+    <% if (!trainer.whatsapp && !trainer.email_contact && !trainer.instagram_url && !trainer.website_url) { %>
+      <p class="text--muted">No contact info provided.</p>
+    <% } %>
+  </section>
+
+  <section class="trainer-section">
+    <h2>Gym</h2>
+    <% if (trainer.gym) { %>
+      <p><strong><%= trainer.gym.name %></strong> — <%= trainer.gym.address %></p>
+      <a href="/gyms/<%= trainer.gym.id %>">View Gym</a>
+    <% } else { %>
+      <p class="text--muted">No gym listed.</p>
+    <% } %>
+  </section>
+
+  <section class="trainer-section">
+    <h2>Schedule</h2>
+    <% if (trainer.schedules && trainer.schedules.length > 0) { %>
+      <ul class="schedule-list">
+        <% trainer.schedules.forEach(function(slot) { %>
+          <li>
+            <%= slot.day_of_week.charAt(0).toUpperCase() + slot.day_of_week.slice(1) %> —
+            <%= slot.start_time %> to <%= slot.end_time %> |
+            <%= slot.session_type %> | Capacity: <%= slot.capacity %>
+            <% if (slot.per_session_rate) { %> | $<%= parseFloat(slot.per_session_rate).toFixed(2) %><% } %>
+            <% if (locals.user && locals.user.role === 'student' && subscription && subscription.status === 'active') { %>
+              <form method="POST" action="/bookings" style="display:inline-block; margin-left: 1rem;">
+                <input type="hidden" name="schedule_id" value="<%= slot.id %>">
+                <input type="hidden" name="trainer_id" value="<%= trainer.id %>">
+                <input type="date" name="session_date" required min="<%= new Date().toISOString().split('T')[0] %>">
+                <button type="submit" class="btn btn--primary btn--sm">Book</button>
+              </form>
+              <form method="POST" action="/waitlist" style="display:inline-block; margin-left: 0.5rem;">
+                <input type="hidden" name="schedule_id" value="<%= slot.id %>">
+                <input type="hidden" name="trainer_id" value="<%= trainer.id %>">
+                <input type="date" name="session_date" required min="<%= new Date().toISOString().split('T')[0] %>">
+                <button type="submit" class="btn btn--secondary btn--sm">Join Waitlist</button>
+              </form>
+            <% } %>
+          </li>
+        <% }) %>
+      </ul>
+    <% } else { %>
+      <p class="text--muted">No schedule slots available yet.</p>
+    <% } %>
+  </section>
+
+  <section class="trainer-section">
+    <h2>Reviews</h2>
+    <% if (trainer.reviews && trainer.reviews.length > 0) { %>
+      <ul class="review-list">
+        <% trainer.reviews.forEach(function(review) { %>
+          <li class="review">
+            <div class="review__header">
+              <strong><%= review.first_name %> <%= review.last_name %></strong>
+              <span class="badge badge--verified">Verified Subscriber</span>
+              <span class="review__rating"><%= review.rating %> ★</span>
+              <span class="review__date"><%= new Date(review.created_at).toLocaleDateString() %></span>
+              <% if (review.edited_at) { %><span class="review__edited">(edited)</span><% } %>
+            </div>
+            <p class="review__comment"><%= review.comment %></p>
+          </li>
+        <% }) %>
+      </ul>
+    <% } else { %>
+      <p class="text--muted">No reviews yet.</p>
+    <% } %>
+  </section>
+
+  <% if (locals.user && locals.user.role === 'student') { %>
+    <% if (reviewContext.qualifyingSubscription && !reviewContext.existingReview) { %>
+      <section class="trainer-section">
+        <h2>Write a Review</h2>
+        <form method="POST" action="/reviews/trainer-reviews">
+          <input type="hidden" name="trainer_id" value="<%= trainer.id %>">
+          <div class="form-group">
+            <label for="rating">Rating</label>
+            <select id="rating" name="rating" required>
+              <option value="">— select —</option>
+              <option value="5">5 ★ Excellent</option>
+              <option value="4">4 ★ Good</option>
+              <option value="3">3 ★ Average</option>
+              <option value="2">2 ★ Below Average</option>
+              <option value="1">1 ★ Poor</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="comment">Comment</label>
+            <textarea id="comment" name="comment" rows="4" required placeholder="Share your experience..."></textarea>
+          </div>
+          <button type="submit" class="btn btn--primary">Submit Review</button>
+        </form>
+      </section>
+    <% } else if (reviewContext.existingReview) { %>
+      <section class="trainer-section">
+        <h2>Your Review</h2>
+        <% const rev = reviewContext.existingReview
+           const canEdit = !rev.locked_at && (Date.now() - new Date(rev.created_at).getTime()) < 48 * 60 * 60 * 1000 %>
+        <p><strong><%= rev.rating %> ★</strong> — <%= rev.comment %></p>
+        <% if (rev.edited_at) { %><small class="text--muted">(edited)</small><% } %>
+        <% if (canEdit) { %>
+          <form method="POST" action="/reviews/trainer-reviews/<%= rev.id %>/edit" style="margin-top: 1rem;">
+            <input type="hidden" name="trainer_id" value="<%= trainer.id %>">
+            <div class="form-group">
+              <label for="edit-rating">Rating</label>
+              <select id="edit-rating" name="rating" required>
+                <option value="">— select —</option>
+                <option value="5" <%= rev.rating === 5 ? 'selected' : '' %>>5 ★ Excellent</option>
+                <option value="4" <%= rev.rating === 4 ? 'selected' : '' %>>4 ★ Good</option>
+                <option value="3" <%= rev.rating === 3 ? 'selected' : '' %>>3 ★ Average</option>
+                <option value="2" <%= rev.rating === 2 ? 'selected' : '' %>>2 ★ Below Average</option>
+                <option value="1" <%= rev.rating === 1 ? 'selected' : '' %>>1 ★ Poor</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="edit-comment">Comment</label>
+              <textarea id="edit-comment" name="comment" rows="4" required><%= rev.comment %></textarea>
+            </div>
+            <button type="submit" class="btn btn--secondary btn--sm">Update Review</button>
+          </form>
+        <% } else { %>
+          <p class="text--muted">This review can no longer be edited.</p>
+        <% } %>
+      </section>
+    <% } %>
+  <% } %>
+
+</main>
+<%- include('../../layouts/base-bottom') %>

@@ -1,0 +1,53 @@
+<%- include('../../layouts/base-top', { title: title }) %>
+<main class="container">
+  <h1>Admin — All Gym Listings</h1>
+
+  <% if (gyms.length === 0 && page === 1) { %>
+    <p class="text--muted">No gym listings yet.</p>
+  <% } else { %>
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Trainer</th>
+          <th>Status</th>
+          <th>Monthly €</th>
+          <th>Created</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% gyms.forEach(function(gym) { %>
+          <tr>
+            <td><%= gym.id %></td>
+            <td><a href="/gyms/<%= gym.id %>"><%= gym.name %></a></td>
+            <td><%= gym.trainer_name %></td>
+            <td><span class="badge badge--<%= gym.status %>"><%= gym.status %></span></td>
+            <td><%= gym.monthly_price ? Number(gym.monthly_price).toFixed(2) : '—' %></td>
+            <td><%= new Date(gym.created_at).toLocaleDateString() %></td>
+            <td>
+              <form method="POST" action="/admin/gyms/<%= gym.id %>/delete"
+                    onsubmit="return confirm('Permanently delete this gym listing?');">
+                <button type="submit" class="btn btn--sm btn--danger">Delete</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+
+    <% if (totalPages > 1) { %>
+      <nav class="pagination">
+        <% if (page > 1) { %>
+          <a href="/admin/gyms?page=<%= page - 1 %>" class="btn btn--sm">← Prev</a>
+        <% } %>
+        <span class="pagination__info">Page <%= page %> of <%= totalPages %></span>
+        <% if (page < totalPages) { %>
+          <a href="/admin/gyms?page=<%= page + 1 %>" class="btn btn--sm">Next →</a>
+        <% } %>
+      </nav>
+    <% } %>
+  <% } %>
+</main>
+<%- include('../../layouts/base-bottom') %>

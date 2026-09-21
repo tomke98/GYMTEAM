@@ -1,0 +1,100 @@
+<%- include('../../layouts/base-top', { title: title }) %>
+<main class="container">
+  <h1>My Trainer Profile</h1>
+
+  <% const p = profile || {} %>
+
+  <form method="POST" action="/trainers/me" enctype="multipart/form-data">
+    <fieldset>
+      <legend>Professional Details</legend>
+
+      <div class="form-group">
+        <label for="bio">Bio</label>
+        <textarea id="bio" name="bio" rows="5"><%= p.bio || '' %></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="certification">Certification</label>
+        <select id="certification" name="certification">
+          <option value="">-- Select --</option>
+          <% ['NASM','ACE','ISSA','NSCA','NESTA','ACSM','Other'].forEach(function(cert) { %>
+            <option value="<%= cert %>" <%= p.certification === cert ? 'selected' : '' %>><%= cert %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div class="form-group form-group--inline">
+        <label>
+          <input type="checkbox" name="cpr_certified" value="true" <%= p.cpr_certified ? 'checked' : '' %>>
+          CPR Certified
+        </label>
+      </div>
+
+      <div class="form-group form-group--inline">
+        <label>
+          <input type="checkbox" name="liability_insurance" value="true" <%= p.liability_insurance ? 'checked' : '' %>>
+          Liability Insurance
+        </label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Rates</legend>
+
+      <div class="form-group">
+        <label for="per_session_rate">Per-Session Rate ($)</label>
+        <input type="number" id="per_session_rate" name="per_session_rate" min="0" step="0.01"
+               value="<%= p.per_session_rate || '' %>">
+      </div>
+
+      <div class="form-group">
+        <label for="monthly_rate">Monthly Rate ($)</label>
+        <input type="number" id="monthly_rate" name="monthly_rate" min="0" step="0.01"
+               value="<%= p.monthly_rate || '' %>">
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Photo &amp; Contact</legend>
+
+      <div class="form-group">
+        <label for="photo_file">Profile Photo</label>
+        <% if (p.photo_url) { %>
+          <div class="current-photo">
+            <img src="<%= p.photo_url %>" alt="Current photo" style="max-width:120px;max-height:120px;object-fit:cover;display:block;margin-bottom:8px;">
+            <small>Upload a new photo below to replace it.</small>
+          </div>
+        <% } %>
+        <input type="file" id="photo_file" name="photo_file" accept="image/*">
+        <input type="hidden" name="photo_url" value="<%= p.photo_url || '' %>">
+      </div>
+
+      <div class="form-group">
+        <label for="whatsapp">WhatsApp (optional)</label>
+        <input type="text" id="whatsapp" name="whatsapp" value="<%= p.whatsapp || '' %>">
+      </div>
+
+      <div class="form-group">
+        <label for="email_contact">Contact Email (optional)</label>
+        <input type="email" id="email_contact" name="email_contact" value="<%= p.email_contact || '' %>">
+      </div>
+
+      <div class="form-group">
+        <label for="instagram_url">Instagram URL (optional)</label>
+        <input type="url" id="instagram_url" name="instagram_url" value="<%= p.instagram_url || '' %>">
+      </div>
+
+      <div class="form-group">
+        <label for="website_url">Website URL (optional)</label>
+        <input type="url" id="website_url" name="website_url" value="<%= p.website_url || '' %>">
+      </div>
+    </fieldset>
+
+    <button type="submit" class="btn btn--primary">Save Profile</button>
+
+    <% if (p.id) { %>
+      <a href="/trainers/<%= p.id %>" class="btn btn--secondary">View Public Profile</a>
+    <% } %>
+  </form>
+</main>
+<%- include('../../layouts/base-bottom') %>

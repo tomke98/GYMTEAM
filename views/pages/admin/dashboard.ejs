@@ -1,0 +1,29 @@
+<%- include('../../layouts/base-top', { title: title }) %>
+<main class="container">
+  <h1>Admin Dashboard</h1>
+  <section class="admin-stats">
+    <div class="stat-card">
+      <span class="stat-card__value"><%= stats.user_count %></span>
+      <span class="stat-card__label">Users</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-card__value"><%= stats.trainer_count %></span>
+      <span class="stat-card__label">Trainers</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-card__value"><%= stats.gym_count %></span>
+      <span class="stat-card__label">Gyms</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-card__value"><%= stats.review_count %></span>
+      <span class="stat-card__label">Reviews</span>
+    </div>
+  </section>
+  <nav class="admin-nav">
+    <a href="/admin/users" class="btn">Manage Users</a>
+    <a href="/admin/gyms" class="btn">Manage Gyms</a>
+    <a href="/admin/reviews" class="btn">Manage Reviews</a>
+    <a href="/admin/alerts" class="btn">Cancellation Alerts</a>
+  </nav>
+</main>
+<%- include('../../layouts/base-bottom') %>

@@ -1,0 +1,33 @@
+<%- include('../../layouts/base-top', { title: 'Register' }) %>
+<main class="container">
+  <h1>Create an Account</h1>
+  <form method="POST" action="/auth/register">
+    <div class="form-group">
+      <label for="first_name">First Name</label>
+      <input type="text" id="first_name" name="first_name" required>
+    </div>
+    <div class="form-group">
+      <label for="last_name">Last Name</label>
+      <input type="text" id="last_name" name="last_name" required>
+    </div>
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" required>
+    </div>
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" required minlength="8">
+    </div>
+    <div class="form-group">
+      <label for="role">I am a</label>
+      <select id="role" name="role" required>
+        <option value="">Select your role</option>
+        <option value="student">Student</option>
+        <option value="trainer">Trainer</option>
+      </select>
+    </div>
+    <button type="submit" class="btn btn--primary">Create Account</button>
+  </form>
+  <p>Already have an account? <a href="/auth/login">Log in</a></p>
+</main>
+<%- include('../../layouts/base-bottom') %>

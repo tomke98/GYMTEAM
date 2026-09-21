@@ -1,0 +1,40 @@
+<%- include('../../layouts/base-top', { title: title }) %>
+<main class="container">
+  <h1>Subscription Requests</h1>
+
+  <% if (requests.length === 0) { %>
+    <p class="text--muted">No pending subscription requests.</p>
+  <% } else { %>
+    <ul class="request-list">
+      <% requests.forEach(function(r) { %>
+        <li class="request-item">
+          <div class="request-item__student">
+            <strong><%= r.student_first_name %> <%= r.student_last_name %></strong>
+          </div>
+          <div class="request-item__dates">
+            <span>Requested: <%= new Date(r.requested_at).toLocaleDateString() %></span>
+            <span class="text--muted">Expires: <%= new Date(r.expires_at).toLocaleDateString() %></span>
+          </div>
+          <div class="request-item__ratings">
+            <% if (r.review_count > 0) { %>
+              <span>Coachability: <%= parseFloat(r.avg_coachability).toFixed(1) %> ★</span>
+              <span>Consistency: <%= parseFloat(r.avg_consistency).toFixed(1) %> ★</span>
+              <span class="text--muted">(<%= r.review_count %> past trainer review<%= r.review_count !== 1 ? 's' : '' %>)</span>
+            <% } else { %>
+              <span class="text--muted">No ratings yet</span>
+            <% } %>
+          </div>
+          <div class="request-item__actions">
+            <form method="POST" action="/subscriptions/<%= r.id %>/accept" style="display:inline">
+              <button type="submit" class="btn btn--primary">Accept</button>
+            </form>
+            <form method="POST" action="/subscriptions/<%= r.id %>/decline" style="display:inline">
+              <button type="submit" class="btn btn--secondary">Decline</button>
+            </form>
+          </div>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+</main>
+<%- include('../../layouts/base-bottom') %>

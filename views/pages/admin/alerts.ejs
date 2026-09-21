@@ -1,0 +1,31 @@
+<%- include('../../layouts/base-top', { title: title }) %>
+<main class="container">
+  <h1>Admin — Cancellation Alerts</h1>
+  <p class="text--muted">Trainers who have cancelled <%= threshold %> or more sessions in the past <%= windowDays %> days.</p>
+
+  <% if (alerts.length === 0) { %>
+    <p class="text--muted">No trainers have cancelled <%= threshold %> or more sessions in the past <%= windowDays %> days.</p>
+  <% } else { %>
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Trainer ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Cancellations (30 days)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% alerts.forEach(function(alert) { %>
+          <tr>
+            <td><%= alert.trainer_id %></td>
+            <td><%= alert.first_name %> <%= alert.last_name %></td>
+            <td><%= alert.email %></td>
+            <td><strong><%= alert.cancellation_count %></strong></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+</main>
+<%- include('../../layouts/base-bottom') %>

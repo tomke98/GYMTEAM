@@ -1,0 +1,82 @@
+<%- include('../../layouts/base-top', { title: title }) %>
+<main class="container">
+  <h1>Manage Schedule</h1>
+  <a href="/auth/trainer-dashboard" class="btn btn--secondary">← Back to Dashboard</a>
+
+  <section class="trainer-section">
+    <h2>Add New Slot</h2>
+    <form method="POST" action="/trainers/me/schedules" class="form">
+      <div class="form__group">
+        <label for="day_of_week">Day of Week</label>
+        <select id="day_of_week" name="day_of_week" required>
+          <option value="">Select day...</option>
+          <option value="mon">Monday</option>
+          <option value="tue">Tuesday</option>
+          <option value="wed">Wednesday</option>
+          <option value="thu">Thursday</option>
+          <option value="fri">Friday</option>
+          <option value="sat">Saturday</option>
+          <option value="sun">Sunday</option>
+        </select>
+      </div>
+      <div class="form__group">
+        <label for="start_time">Start Time</label>
+        <input type="time" id="start_time" name="start_time" required>
+      </div>
+      <div class="form__group">
+        <label for="end_time">End Time</label>
+        <input type="time" id="end_time" name="end_time" required>
+      </div>
+      <div class="form__group">
+        <label for="session_type">Session Type</label>
+        <select id="session_type" name="session_type" required>
+          <option value="individual">Individual</option>
+          <option value="group">Group</option>
+          <option value="semi_private">Semi-Private</option>
+        </select>
+      </div>
+      <div class="form__group">
+        <label for="capacity">Capacity</label>
+        <input type="number" id="capacity" name="capacity" min="1" value="1" required>
+      </div>
+      <div class="form__group">
+        <label for="per_session_rate">Per-Session Rate Override (optional, $)</label>
+        <input type="number" id="per_session_rate" name="per_session_rate" min="0" step="0.01" placeholder="Leave blank to use your default rate">
+      </div>
+      <button type="submit" class="btn btn--primary">Add Slot</button>
+    </form>
+  </section>
+
+  <section class="trainer-section">
+    <h2>Current Schedule</h2>
+    <% if (schedules.length === 0) { %>
+      <p class="text--muted">No schedule slots yet. Add your first slot above.</p>
+    <% } else { %>
+      <ul class="schedule-list">
+        <% schedules.forEach(function(slot) { %>
+          <li class="schedule-item">
+            <div class="schedule-item__info">
+              <strong><%= slot.day_of_week.charAt(0).toUpperCase() + slot.day_of_week.slice(1) %></strong>
+              &mdash;
+              <%= slot.start_time.substring(0, 5) %> to <%= slot.end_time.substring(0, 5) %>
+              &nbsp;|&nbsp;
+              <%= slot.session_type === 'semi_private' ? 'Semi-Private' : slot.session_type.charAt(0).toUpperCase() + slot.session_type.slice(1) %>
+              &nbsp;|&nbsp;
+              Capacity: <%= slot.capacity %>
+              <% if (slot.per_session_rate !== null && slot.per_session_rate !== undefined) { %>
+                &nbsp;|&nbsp; $<%= parseFloat(slot.per_session_rate).toFixed(2) %>/session
+              <% } %>
+            </div>
+            <div class="schedule-item__actions">
+              <a href="/trainers/me/schedules/<%= slot.id %>/edit" class="btn btn--secondary">Edit</a>
+              <form method="POST" action="/trainers/me/schedules/<%= slot.id %>/delete" style="display:inline">
+                <button type="submit" class="btn btn--danger">Delete</button>
+              </form>
+            </div>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </section>
+</main>
+<%- include('../../layouts/base-bottom') %>

@@ -1,0 +1,3 @@
+ALTER TABLE student_reviews
+  ADD COLUMN deleted_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  ADD COLUMN deleted_at TIMESTAMP WITH TIME ZONE;

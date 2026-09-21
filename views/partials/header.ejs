@@ -1,0 +1,39 @@
+<nav class="nav">
+  <a class="nav__brand" href="/">GymTeam</a>
+  <ul class="nav__links">
+    <% if (!locals.user) { %>
+      <li><a href="/auth/register">Register</a></li>
+      <li><a href="/auth/login">Login</a></li>
+    <% } else if (locals.user.role === 'student') { %>
+      <li><a href="/auth/student-dashboard">Dashboard</a></li>
+      <li><a href="/trainers">Browse Trainers</a></li>
+      <li><a href="/gyms">Browse Gyms</a></li>
+      <li><a href="/subscriptions">My Subscriptions</a></li>
+      <li><a href="/gym-subscriptions">My Gym Subscriptions</a></li>
+      <li><a href="/bookings">My Bookings</a></li>
+      <li><a href="/waitlist">Waitlist</a></li>
+      <li><a href="/auth/profile">Profile</a></li>
+    <% } else if (locals.user.role === 'trainer') { %>
+      <li><a href="/auth/trainer-dashboard">Dashboard</a></li>
+      <li><a href="/trainers/me/edit">Trainer Profile</a></li>
+      <li><a href="/trainers/me/schedules">Schedule</a></li>
+      <li><a href="/bookings/trainer">My Bookings</a></li>
+      <li><a href="/gyms/me">My Gym</a></li>
+      <li><a href="/subscriptions/requests">Requests</a></li>
+      <li><a href="/auth/profile">Account</a></li>
+    <% } else { %>
+      <li><a href="/admin">Dashboard</a></li>
+      <li><a href="/admin/users">Users</a></li>
+      <li><a href="/admin/gyms">Gyms</a></li>
+      <li><a href="/admin/reviews">Reviews</a></li>
+      <li><a href="/admin/alerts">Alerts</a></li>
+    <% } %>
+    <% if (locals.user) { %>
+      <li>
+        <form action="/auth/logout" method="POST">
+          <button type="submit">Logout</button>
+        </form>
+      </li>
+    <% } %>
+  </ul>
+</nav>

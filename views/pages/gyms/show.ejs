@@ -1,0 +1,180 @@
+<%- include('../../layouts/base-top', { title: title }) %>
+<main class="container">
+
+  <% if (gym.status === 'incomplete') { %>
+    <div class="alert alert--warning">⚠️ Incomplete Listing — this gym hasn't filled all required fields.</div>
+  <% } %>
+  <% if (gym.status === 'inactive') { %>
+    <div class="alert alert--info">This gym listing is currently inactive.</div>
+  <% } %>
+
+  <div class="gym-header">
+    <% if (gym.photo_urls && gym.photo_urls.length > 0) { %>
+      <img src="<%= gym.photo_urls[0] %>" alt="<%= gym.name %>" class="gym-photo">
+    <% } %>
+    <div>
+      <h1><%= gym.name %></h1>
+      <p class="gym-address"><%= gym.address %></p>
+      <% if (gym.average_rating) { %>
+        <div class="rating-block">
+          <% if (gym.recent_average_rating) { %>
+            <span class="rating rating--primary"><%= parseFloat(gym.recent_average_rating).toFixed(1) %> ★ <small class="text--muted">6-month avg</small></span>
+          <% } else { %>
+            <span class="rating rating--muted">No recent reviews <small class="text--muted">(6-month)</small></span>
+          <% } %>
+          <span class="rating rating--secondary text--muted"><%= parseFloat(gym.average_rating).toFixed(1) %> ★ all-time (<%= gym.review_count %> review<%= gym.review_count !== 1 ? 's' : '' %>)</span>
+        </div>
+      <% } else { %>
+        <span class="rating rating--empty">No ratings yet</span>
+      <% } %>
+    </div>
+  </div>
+
+  <% if (locals.user && String(locals.user.userId) === String(gym.trainer_id)) { %>
+    <a href="/gyms/<%= gym.id %>/edit" class="btn btn--secondary">Edit Listing</a>
+  <% } %>
+
+  <% if (locals.user && locals.user.role === 'student' && gym.status === 'active') { %>
+    <section class="gym-section">
+      <h2>Subscription</h2>
+      <% if (gymSubscription) { %>
+        <p>You have an <strong>active</strong> subscription to this gym.</p>
+        <a href="/gym-subscriptions" class="btn btn--secondary">View My Gym Subscriptions</a>
+      <% } else { %>
+        <form method="POST" action="/gym-subscriptions">
+          <input type="hidden" name="gym_id" value="<%= gym.id %>">
+          <button type="submit" class="btn btn--primary">Subscribe to Gym</button>
+        </form>
+      <% } %>
+    </section>
+  <% } %>
+
+  <section class="gym-section">
+    <h2>Hours &amp; Schedule</h2>
+    <% if (gym.opening_time || gym.closing_time) { %>
+      <p>
+        <% if (gym.opening_time) { %><%= gym.opening_time.substring(0,5) %><% } %>
+        <% if (gym.opening_time && gym.closing_time) { %> — <% } %>
+        <% if (gym.closing_time) { %><%= gym.closing_time.substring(0,5) %><% } %>
+      </p>
+    <% } else { %>
+      <p class="text--muted">Hours not listed.</p>
+    <% } %>
+    <% if (gym.working_days && gym.working_days.length > 0) { %>
+      <p><%= gym.working_days.map(d => d.charAt(0).toUpperCase() + d.slice(1)).join(', ') %></p>
+    <% } %>
+  </section>
+
+  <section class="gym-section">
+    <h2>Pricing</h2>
+    <% if (gym.monthly_price) { %>
+      <p>Monthly: <strong>$<%= parseFloat(gym.monthly_price).toFixed(2) %></strong></p>
+    <% } %>
+    <% if (gym.yearly_price) { %>
+      <p>Yearly: <strong>$<%= parseFloat(gym.yearly_price).toFixed(2) %></strong></p>
+    <% } %>
+    <% if (!gym.monthly_price && !gym.yearly_price) { %>
+      <p class="text--muted">No pricing listed.</p>
+    <% } %>
+  </section>
+
+  <% if (gym.description) { %>
+    <section class="gym-section">
+      <h2>About</h2>
+      <p><%= gym.description %></p>
+    </section>
+  <% } %>
+
+  <% if (gym.photo_urls && gym.photo_urls.length > 0) { %>
+    <section class="gym-section">
+      <h2>Photos</h2>
+      <div class="photo-gallery">
+        <% gym.photo_urls.forEach(function(url) { %>
+          <img src="<%= url %>" alt="<%= gym.name %>" class="gallery-photo">
+        <% }) %>
+      </div>
+    </section>
+  <% } %>
+
+  <section class="gym-section">
+    <h2>Reviews</h2>
+    <% if (gym.reviews && gym.reviews.length > 0) { %>
+      <ul class="review-list">
+        <% gym.reviews.forEach(function(review) { %>
+          <li class="review">
+            <div class="review__header">
+              <strong><%= review.first_name %> <%= review.last_name %></strong>
+              <span class="badge badge--verified">Verified Subscriber</span>
+              <span class="review__rating"><%= review.rating %> ★</span>
+              <span class="review__date"><%= new Date(review.created_at).toLocaleDateString() %></span>
+              <% if (review.edited_at) { %><span class="review__edited">(edited)</span><% } %>
+            </div>
+            <p class="review__comment"><%= review.comment %></p>
+          </li>
+        <% }) %>
+      </ul>
+    <% } else { %>
+      <p class="text--muted">No reviews yet.</p>
+    <% } %>
+  </section>
+
+  <% if (locals.user && locals.user.role === 'student') { %>
+    <% if (reviewContext.qualifyingSubscription && !reviewContext.existingReview) { %>
+      <section class="gym-section">
+        <h2>Write a Review</h2>
+        <form method="POST" action="/reviews/gym-reviews">
+          <input type="hidden" name="gym_id" value="<%= gym.id %>">
+          <div class="form-group">
+            <label for="rating">Rating</label>
+            <select id="rating" name="rating" required>
+              <option value="">— select —</option>
+              <option value="5">5 ★ Excellent</option>
+              <option value="4">4 ★ Good</option>
+              <option value="3">3 ★ Average</option>
+              <option value="2">2 ★ Below Average</option>
+              <option value="1">1 ★ Poor</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="comment">Comment</label>
+            <textarea id="comment" name="comment" rows="4" required placeholder="Share your experience..."></textarea>
+          </div>
+          <button type="submit" class="btn btn--primary">Submit Review</button>
+        </form>
+      </section>
+    <% } else if (reviewContext.existingReview) { %>
+      <section class="gym-section">
+        <h2>Your Review</h2>
+        <% const rev = reviewContext.existingReview
+           const canEdit = !rev.locked_at && (Date.now() - new Date(rev.created_at).getTime()) < 48 * 60 * 60 * 1000 %>
+        <p><strong><%= rev.rating %> ★</strong> — <%= rev.comment %></p>
+        <% if (rev.edited_at) { %><small class="text--muted">(edited)</small><% } %>
+        <% if (canEdit) { %>
+          <form method="POST" action="/reviews/gym-reviews/<%= rev.id %>/edit" style="margin-top: 1rem;">
+            <input type="hidden" name="gym_id" value="<%= gym.id %>">
+            <div class="form-group">
+              <label for="edit-rating">Rating</label>
+              <select id="edit-rating" name="rating" required>
+                <option value="">— select —</option>
+                <option value="5" <%= rev.rating === 5 ? 'selected' : '' %>>5 ★ Excellent</option>
+                <option value="4" <%= rev.rating === 4 ? 'selected' : '' %>>4 ★ Good</option>
+                <option value="3" <%= rev.rating === 3 ? 'selected' : '' %>>3 ★ Average</option>
+                <option value="2" <%= rev.rating === 2 ? 'selected' : '' %>>2 ★ Below Average</option>
+                <option value="1" <%= rev.rating === 1 ? 'selected' : '' %>>1 ★ Poor</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="edit-comment">Comment</label>
+              <textarea id="edit-comment" name="comment" rows="4" required><%= rev.comment %></textarea>
+            </div>
+            <button type="submit" class="btn btn--secondary btn--sm">Update Review</button>
+          </form>
+        <% } else { %>
+          <p class="text--muted">This review can no longer be edited.</p>
+        <% } %>
+      </section>
+    <% } %>
+  <% } %>
+
+</main>
+<%- include('../../layouts/base-bottom') %>
